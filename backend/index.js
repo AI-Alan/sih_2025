@@ -5,7 +5,7 @@ if(process.env.NODE_ENV != "production"){
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const authUser = require("./routes/authRoute");
+const routes = require("./routes/index.js");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const jwtAuth = require("./middleware/auth");
@@ -48,7 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); 
 app.use(session(sessionOptions));
 
-app.use("/api", authUser);
+app.use("/api", routes);
 
 app.get("/protectedRoute", jwtAuth, (req, res) => {
     res.send("home page");
