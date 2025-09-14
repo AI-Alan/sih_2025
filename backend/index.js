@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const authUser = require("./routes/authRoute");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
+const jwtAuth = require("./middleware/auth");
 
 main()
    .then(() => {
@@ -49,7 +50,7 @@ app.use(session(sessionOptions));
 
 app.use("/api", authUser);
 
-app.get("/", (req, res) => {
+app.get("/protectedRoute", jwtAuth, (req, res) => {
     res.send("home page");
 })
 
