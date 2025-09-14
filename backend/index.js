@@ -5,9 +5,9 @@ if(process.env.NODE_ENV != "production"){
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const User = require("./models/user");
-
-app.use(express.urlencoded({ extended: true }));
+const authUser = require("./routes/authRoute");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
 main()
    .then(() => {
@@ -21,19 +21,36 @@ async function main(){
     await mongoose.connect(process.env.ATLASDB_URL);
 }
 
-app.get("/api", (req, res) => {
-    try {
-        res.status(200).json({
-            msg: "api is working"
-        })
-    } catch (error) {
-        res.status(400).json(error)
-    }
-})
+//session store in mongodb
+const store = MongoStore.create({
+    mongoUrl: process.env.ATLASDB_URL,
+    crypto: {
+        secret: process.env.SESSION_SECRET,
+    },
+    touchAfter: 24 * 3600, // time in seconds
+});
+
+//store in cookie
+const sessionOptions = {
+    store,
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 3 * 24 * 60 * 60 * 1000,
+        maAge: 3 * 24 * 60 * 60 * 1000,
+        httpOnly: true
+    },
+};
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); 
+app.use(session(sessionOptions));
+
+app.use("/api", authUser);
 
 app.get("/", (req, res) => {
-    res.send("working");
-    console.log("app is working");
+    res.send("home page");
 })
 
 app.listen(8080, () => {
