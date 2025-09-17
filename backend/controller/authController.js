@@ -19,20 +19,24 @@ module.exports.login = async (req, res) => {
         const user = await User.findOne({ username });
 
         if(!user){
-            return res.json("user not found.... please insert valid username, password");    
+            return res.json("No account found with this email, Please register to continue");    
         }else{
             const isMatch = await bcrypt.compare(password, user.password);
             if(!isMatch) return res.status(400).json({message: "Invalid Credentials"});
             const token = jwt.sign(
                 {userId: user._id, username},
                 process.env.JWT_SECRET_KEY,
-                {  expiresIn: "1h" },
+                {  expiresIn: "1d" },
             );
-
-            res.status(200).json({ success: true, msg: "User loggedIn successfully", token})
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: false, //true in production
+                maxAge: 259200000
+            })
+            return res.status(200).json({ success: true, msg: "User login successfully", user, token})
         }
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message })
+        res.status(500).json({ success: false, msg: "Internal server error", error: error.message })
     }
 }
 
@@ -52,7 +56,7 @@ module.exports.signUp = async (req, res) => {
         const { username, email, password, role } = req.body;
         const existingUser = await User.findOne({ $or: [{username}, {email}]});
 
-        if(existingUser) return res.status(400).json({ message: "User account already exist pls login"});
+        if(existingUser) return res.status(400).json({ message: "User already exist please login to continue"});
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
@@ -66,16 +70,17 @@ module.exports.signUp = async (req, res) => {
         res.status(200).json({ success: true, msg: "User registered successfully", savedUser })
 
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message })
+        res.status(500).json({ success: false, msg: "Internal server errror", error: error.message })
     }
 }
 
-module.exports.logout = (req, res) => {
-    res.clearCookie("connect.sid", {
-        httpOnly: true,
-        secure: true,
-    });
-    res.status(200).json({ success: true, message: "Logged out successfully" });
+module.exports.logout = async (req, res) => {
+    try {
+        res.clearCookie("token");
+        res.status(200).json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, msg: "Internal server errror", error: error.message })
+    }
 }
 
 exports.resetPassword = (req, res) => {
