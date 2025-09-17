@@ -2,16 +2,58 @@ const User = require("../models/user");
 const {validationResult} = require("express-validator");
 const bcrypt = require("bcryptjs");
 
-exports.getAllUser = (req, res) => {
-    res.send("get all users");
+exports.getAllUser = async (req, res) => {
+    try {
+        const users = await User.find({});
+
+        if(!users) {
+            return res.status(403).json({success: false, msg: "No user found"})
+        }
+        
+        res.status(200).json({success: true, msg: "All users fetched successfully", users});
+
+    } catch (error) {
+        res.status(500).json({success: false, msg: "Internal server error", error: error.message});
+    }
 }
 
-exports.updateUser = (req, res) => {
-    res.send("update user details");
+exports.updateUser = async (req, res) => {
+    try {
+        const { id } = req.params; // user id from route
+        const updates = req.body;  // fields to update
+        console.log(updates);
+        // Find user and update
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { $set: updates},
+            {new:true}
+        );
+        console.log(updatedUser)
+
+        if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "User updated successfully", user: updatedUser });
+
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message })
+    }
 }
 
-exports.deleteUser = (req, res) => {
-    res.send("delete user");
+exports.deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({success: true, msg: "User deleted successfully", user: deletedUser})
+    } catch (error) {
+        res.status(500).json({success: false, msg: "Internal server error", errror: error.message})
+    }
 }
 
 exports.getAllCounsellor = async (req, res) => {
@@ -59,20 +101,20 @@ exports.createCounsellor = async (req, res) => {
     }
 }
 
-exports.updateCounsellor = (req, res) => {
-    res.send("update user counsellor");
-}
+// exports.updateCounsellor = (req, res) => {
+//     res.send("update user counsellor");
+// }
 
-exports.deleteCounsellor = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deletedCounsellor = await User.findByIdAndDelete(id);
+// exports.deleteCounsellor = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const deletedCounsellor = await User.findByIdAndDelete(id);
 
-        res.status(200).json({success: true, msg: "Counsellor deleted successfully" ,deletedCounsellor})
-    } catch (error) {
-        res.status(400).json({ success: false, msg: "Error in deleting counsellor" ,error: error.message })
-    }
-}
+//         res.status(200).json({success: true, msg: "Counsellor deleted successfully" ,deletedCounsellor})
+//     } catch (error) {
+//         res.status(400).json({ success: false, msg: "Error in deleting counsellor" ,error: error.message })
+//     }
+// }
 
 exports.adminDashboard = (req, res) => {
     res.send("admin dashboard");
