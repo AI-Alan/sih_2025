@@ -3,17 +3,22 @@ const User = require("../models/user");
 
 const jwtAuth = async (req, res, next) => {
     try {
-        const bearerHeader = req.headers["authorization"]
-        if(typeof bearerHeader != "undefined"){
-            const token = bearerHeader.split(" ")[1];
-            
-            const decodedUser = jwt.verify(token, process.env.JWT_SECRET_KEY);
-            console.log(decodedUser)
-            req.token = decodedUser;
-            next()
-        }else{
-            res.status(401).json({message: "No token provided"})
+        //get token from header
+        const bearerHeader = req.headers["authorization"];
+        const bearerToken =  bearerHeader && bearerHeader.startsWith("Bearer ") ? bearerHeader.split(" ")[1] : null;
+        const token = bearerToken || req.cookies.token;
+
+        if (!token) {
+        return res.status(401).json({ message: "No token Provided" });
         }
+        
+        //verify token
+        const decodedUser = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+        const user = await User.findById(decodedUser.userId);
+        req.user = user;
+
+        next();
     } catch (error) {
         res.status(401).json({ success: false, msg: "Invalid or expired token"})
     }

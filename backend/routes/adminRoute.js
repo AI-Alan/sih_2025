@@ -1,36 +1,27 @@
 const express = require("express");
 const router = express.Router();
+const { registerValidator } = require("../middleware/validator.js");
+const { getAllUser, updateUser, deleteUser, getAllCounsellor, createCounsellor, updateCounsellor, deleteCounsellor, dashboard} = require("../controller/adminController");
+const jwtAuth = require("../middleware/auth.js");
+const isAdmin = require("../middleware/isAdmin.js");
+const cookieParser = require("cookie-parser");
 
-router.get("/admin/user", (req, res) => {
-    res.send("get all users");
-})
+router.use(cookieParser());
+router.use(jwtAuth);
+router.use(isAdmin);
 
-router.post("/admin/user", (req, res) => {
-    res.send("create new user");
-})
+router.get("/user", getAllUser)
 
-router.put("/admin/user/:id", (req, res) => {
-    res.send("update user details");
-})
+router.post("/counsellor", registerValidator, createCounsellor)
 
-router.delete("/admin/user/:id", (req, res) => {
-    res.send("delete user");
-})
+router.put("/user/:id", updateUser)
 
-router.get("/admin/counsellor", (req, res) => {
-    res.send("get all counsellors");
-})
+router.delete("/user/:id", deleteUser)
 
-router.post("/admin/counsellor", (req, res) => {
-    res.send("create new counsellor");
-})
+router.get("/counsellor", getAllCounsellor)
 
-router.put("/admin/counsellor/:id", (req, res) => {
-    res.send("update counsellor details");
-})
+// router.put("/counsellor/:id", updateCounsellor)
 
-router.delete("/admin/counsellor/:id", (req, res) => {
-    res.send("delete counsellor");
-})
+// router.delete("/counsellor/:id", deleteCounsellor)
 
 module.exports = router;

@@ -1,16 +1,14 @@
 const express = require("express");
+const { peerChat, counsellorChat, aiChat } = require("../controller/userController");
+const jwtAuth = require("../middleware/auth");
 const router = express.Router();
 
-router.post("/user/chat/peer-to-peer", (req, res) => {
-    res.send("peer to peer chat");
-})
+router.use(jwtAuth);
 
-router.post("/user/chat/counsellor", (req, res) => {
-    res.send("chat with counsellor")
-})
+router.post("/peer-to-peer", peerChat)
 
-router.post("/user/chat/ai", (req, res) => {
-    res.send("chat with AI")
-})
+router.post("/counsellor", counsellorChat)
+
+router.post("/ai", aiChat)
 
 module.exports = router;
