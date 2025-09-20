@@ -15,8 +15,8 @@ module.exports.login = async (req, res) => {
         });
         } 
 
-        const { username, password } = req.body;
-        const user = await User.findOne({ username });
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
 
         if(!user){
             return res.json("No account found with this email, Please register to continue");    
@@ -24,7 +24,7 @@ module.exports.login = async (req, res) => {
             const isMatch = await bcrypt.compare(password, user.password);
             if(!isMatch) return res.status(400).json({message: "Invalid Credentials"});
             const token = jwt.sign(
-                {userId: user._id, username},
+                {userId: user._id, email},
                 process.env.JWT_SECRET_KEY,
                 {  expiresIn: "1d" },
             );
@@ -53,14 +53,17 @@ module.exports.signUp = async (req, res) => {
             });
         }
         //save User
-        const { username, email, password, role } = req.body;
-        const existingUser = await User.findOne({ $or: [{username}, {email}]});
+        const { firstName, lastName, university, program, email, password, role } = req.body;
+        const existingUser = await User.findOne({email});
 
         if(existingUser) return res.status(400).json({ message: "User already exist please login to continue"});
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
-            username,
+            firstName,
+            lastName,
+            university,
+            program,
             email, 
             password: hashedPassword,
             role

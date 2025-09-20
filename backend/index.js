@@ -1,11 +1,19 @@
-if(process.env.NODE_ENV != "production"){
-    require("dotenv").config();
-}
+import dotenv from "dotenv";
+import express from "express";
+import routes from "./routes/index.js";
+import dbConnection from "./utils/db.js";
+import cors from "cors";
+dotenv.config();
 
-const express = require("express");
 const app = express();
-const routes = require("./routes/index.js");
-const dbConnection = require("./utils/db.js");
+
+const corsOptions = {
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+}
+app.use(cors(corsOptions));
 
 //db connection
 dbConnection()
