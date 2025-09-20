@@ -1,5 +1,5 @@
 const config = {
-    API_BASE_URL: 'https://api.example.com',
+    API_BASE_URL: 'http://localhost:8080',
     TIMEOUT: 5000,
     RETRY_ATTEMPTS: 3,
 

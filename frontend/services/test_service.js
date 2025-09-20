@@ -1,7 +1,5 @@
 import axiosInstance from "../network/core/axiosInstance";
 
-
-
 export const getRoot = async () => {
     try {
         const response = await axiosInstance.get('/');
@@ -10,4 +8,4 @@ export const getRoot = async () => {
         console.error('Error fetching root:', error);
         throw error;
     }
-}
+};

@@ -1,4 +1,4 @@
-import getRoot from "../services/test_service";
+import { getRoot } from "../services/test_service";
 
 
 
