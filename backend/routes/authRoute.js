@@ -1,7 +1,7 @@
-import express from "express";
+import express from 'express';
 const router = express.Router();
-import { registerValidator, validateLogin } from "../middleware/validator.js";
-import { login, signUp, logout, resetPassword } from "../controller/authController.js";
+import { registerValidator, validateLogin } from '../middleware/validator.js';
+import { login, signUp, logout, resetPassword } from '../controller/authController.js';
 
 router.post("/signUp", registerValidator, signUp)
 
