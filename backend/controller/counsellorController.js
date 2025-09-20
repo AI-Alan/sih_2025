@@ -1,3 +1,3 @@
-exports.getAssignedUser = (req, res) => {
+export const getAssignedUser = (req, res) => {
     res.send("get assigned user/student");
 }

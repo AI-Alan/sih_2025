@@ -1,9 +1,8 @@
-const express = require("express");
-const authRoute = require("./authRoute");
-const counsellorRoute = require("./counsellorRoute");
-const adminRoute = require("./adminRoute");
-const userRoute = require("./userRoute");
-
+import express from 'express';
+import authRoute from './authRoute.js';
+import counsellorRoute from './counsellorRoute.js';
+import adminRoute from './adminRoute.js'
+import userRoute from './userRoute.js';
 const router = express.Router();
 
 router.use("/user/chat", userRoute);
@@ -11,4 +10,4 @@ router.use("/counsellor", counsellorRoute);
 router.use("/admin", adminRoute);
 router.use("/auth", authRoute);
 
-module.exports = router;
+export default router;

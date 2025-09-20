@@ -1,8 +1,8 @@
-const User = require("../models/user");
-const {validationResult} = require("express-validator");
-const bcrypt = require("bcryptjs");
+import User from '../models/user.js';
+import { validationResult } from 'express-validator';
+import bcrypt from 'bcryptjs';
 
-exports.getAllUser = async (req, res) => {
+export const getAllUser = async (req, res) => {
     try {
         const users = await User.find({});
 
@@ -17,7 +17,7 @@ exports.getAllUser = async (req, res) => {
     }
 }
 
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const { id } = req.params; // user id from route
         const updates = req.body;  // fields to update
@@ -41,7 +41,7 @@ exports.updateUser = async (req, res) => {
     }
 }
 
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedUser = await User.findByIdAndDelete(id);
@@ -56,7 +56,7 @@ exports.deleteUser = async (req, res) => {
     }
 }
 
-exports.getAllCounsellor = async (req, res) => {
+export const getAllCounsellor = async (req, res) => {
     try {
         const counsellors = await User.find({});
         console.log(counsellors);
@@ -67,7 +67,7 @@ exports.getAllCounsellor = async (req, res) => {
     }
 }
 
-exports.createCounsellor = async (req, res) => {
+export const createCounsellor = async (req, res) => {
     try {
         //check validation error
         const errors = validationResult(req);
@@ -101,11 +101,11 @@ exports.createCounsellor = async (req, res) => {
     }
 }
 
-// exports.updateCounsellor = (req, res) => {
+// export const updateCounsellor = (req, res) => {
 //     res.send("update user counsellor");
 // }
 
-// exports.deleteCounsellor = async (req, res) => {
+// exports const deleteCounsellor = async (req, res) => {
 //     try {
 //         const { id } = req.params;
 //         const deletedCounsellor = await User.findByIdAndDelete(id);
@@ -116,6 +116,6 @@ exports.createCounsellor = async (req, res) => {
 //     }
 // }
 
-exports.adminDashboard = (req, res) => {
+export const adminDashboard = (req, res) => {
     res.send("admin dashboard");
 }

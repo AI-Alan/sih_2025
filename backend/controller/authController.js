@@ -1,9 +1,9 @@
-const User = require("../models/user");
-const {validationResult} = require("express-validator");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs")
+import User from '../models/user.js';
+import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
-module.exports.login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         //check validation error
         const errors = validationResult(req);
@@ -40,7 +40,7 @@ module.exports.login = async (req, res) => {
     }
 }
 
-module.exports.signUp = async (req, res) => {
+export const signUp = async (req, res) => {
     try {
         //check validation error
         const errors = validationResult(req);
@@ -77,7 +77,7 @@ module.exports.signUp = async (req, res) => {
     }
 }
 
-module.exports.logout = async (req, res) => {
+export const logout = async (req, res) => {
     try {
         res.clearCookie("token");
         res.status(200).json({ success: true, message: "Logged out successfully" });
@@ -86,7 +86,7 @@ module.exports.logout = async (req, res) => {
     }
 }
 
-exports.resetPassword = (req, res) => {
+export const resetPassword = (req, res) => {
     // try {
     //     const { token, updatedPassword } = req.body;
     //     console.log(token, updatedPassword);

@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { registerValidator, validateLogin } = require("../middleware/validator");
-const { login, signUp, logout, resetPassword } = require("../controller/authController");
+import { registerValidator, validateLogin } from "../middleware/validator.js";
+import { login, signUp, logout, resetPassword } from "../controller/authController.js";
 
 router.post("/signUp", registerValidator, signUp)
 
@@ -11,4 +11,4 @@ router.post("/logout", logout)
 
 router.put("/resetPassword", validateLogin, resetPassword)
 
-module.exports = router;
+export default router;

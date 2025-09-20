@@ -1,9 +1,11 @@
-if (process.env.NODE_ENV !== "production") {
-    require("dotenv").config();
-}
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import dbConnection from './utils/db.js';
+import routes from './routes/index.js';
 
-const express = require("express");
-const cors = require("cors"); // <-- import cors
+dotenv.config();
+
 const app = express();
 
 const corsOptions = {
@@ -16,13 +18,6 @@ app.use(cors(corsOptions));
 
 // DB connection
 dbConnection()
-
-// Enable CORS
-app.use(cors({
-    origin: "*", // <-- allow all origins (for development)
-    methods: ["GET", "POST", "PUT", "DELETE"], // allowed HTTP methods
-    credentials: true // allow cookies if needed
-}));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

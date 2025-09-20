@@ -1,10 +1,10 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const { registerValidator } = require("../middleware/validator.js");
-const { getAllUser, updateUser, deleteUser, getAllCounsellor, createCounsellor, updateCounsellor, deleteCounsellor, dashboard} = require("../controller/adminController");
-const jwtAuth = require("../middleware/auth.js");
-const isAdmin = require("../middleware/isAdmin.js");
-const cookieParser = require("cookie-parser");
+import { registerValidator } from '../middleware/validator.js';
+import { getAllUser, updateUser, deleteUser, getAllCounsellor, createCounsellor } from '../controller/adminController.js';
+import jwtAuth from '../middleware/auth.js';
+import isAdmin from '../middleware/isAdmin.js';
+import cookieParser from 'cookie-parser';
 
 router.use(cookieParser());
 router.use(jwtAuth);
@@ -24,4 +24,4 @@ router.get("/counsellor", getAllCounsellor)
 
 // router.delete("/counsellor/:id", deleteCounsellor)
 
-module.exports = router;
+export default router;

@@ -1,6 +1,6 @@
-const { check } = require("express-validator");
+import { check } from 'express-validator';
 
-exports.registerValidator = [
+export const registerValidator = [
   check("firstName", "First name is required").not().isEmpty().trim(),
   check("lastName", "Last name is required").not().isEmpty().trim(),
   check("university", "University is required").not().isEmpty().trim(),
@@ -11,13 +11,13 @@ exports.registerValidator = [
  check("password", "password is required").not().isEmpty().trim(),
 ];
 
-exports.validateLogin = [
+export const validateLogin = [
   check("email", "Valid email is required").isEmail().normalizeEmail({
     gmail_remove_dots: true,
   }),
   check("password", "password is required").not().isEmpty().trim()
 ];
 
-exports.validateNewPassword = [
+// export default validateNewPassword = [
   
-]
+// ]
