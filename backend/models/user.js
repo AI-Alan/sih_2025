@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    contactNo: {
+        type: Number,
+        required: true,
+    },
     university: {
         type: String,
         required: true,
@@ -18,6 +22,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    branch: String,
+    semester: String,   
     email: {
         type: String,
         required: true,
