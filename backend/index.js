@@ -1,8 +1,10 @@
+// backend/index.js
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import dbConnection from './utils/db.js';
 import routes from './routes/index.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -13,14 +15,15 @@ const corsOptions = {
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
-}
+};
 app.use(cors(corsOptions));
 
 // DB connection
-dbConnection()
+dbConnection();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api", routes);
 

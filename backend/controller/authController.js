@@ -1,4 +1,6 @@
 import User from '../models/user.js';
+import Counsellor from '../models/counsellor.js';
+import Admin from '../models/admin.js';
 import { validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -24,7 +26,7 @@ export const login = async (req, res) => {
             const isMatch = await bcrypt.compare(password, user.password);
             if(!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
             const token = jwt.sign(
-                {userId: user._id, email},
+                {userId: user._id, email, role: user.role || 'student'},
                 process.env.JWT_SECRET_KEY,
                 {  expiresIn: "1d" },
             );
@@ -38,6 +40,50 @@ export const login = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error", error: error.message })
+    }
+}
+
+export const loginCounsellor = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ success: false, message: "Form validation error", errors: errors.array() });
+        }
+        const { email, password } = req.body;
+        const counsellor = await Counsellor.findOne({ email });
+        if (!counsellor) {
+            return res.status(404).json({ success: false, message: "No counsellor account found with this email." });
+        }
+        const isMatch = await bcrypt.compare(password, counsellor.password);
+        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
+        const token = jwt.sign({ userId: counsellor._id, email, role: 'counsellor' }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+        res.cookie('token', token, { httpOnly: true, secure: false, maxAge: 259200000 });
+        const { password: _pw, ...safe } = counsellor.toObject();
+        return res.status(200).json({ success: true, message: 'Counsellor login successfully', user: safe, token });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+export const loginAdmin = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ success: false, message: "Form validation error", errors: errors.array() });
+        }
+        const { email, password } = req.body;
+        const admin = await Admin.findOne({ email });
+        if (!admin) {
+            return res.status(404).json({ success: false, message: "No admin account found with this email." });
+        }
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
+        const token = jwt.sign({ userId: admin._id, email, role: 'admin' }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+        res.cookie('token', token, { httpOnly: true, secure: false, maxAge: 259200000 });
+        const { password: _pw, ...safe } = admin.toObject();
+        return res.status(200).json({ success: true, message: 'Admin login successfully', user: safe, token });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 

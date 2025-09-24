@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
+import Counsellor from '../models/counsellor.js';
+import Admin from '../models/admin.js';
 
 const jwtAuth = async (req, res, next) => {
     try {
@@ -14,8 +16,15 @@ const jwtAuth = async (req, res, next) => {
         
         //verify token
         const decodedUser = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-        const user = await User.findById(decodedUser.userId);
+        const { userId, role } = decodedUser;
+        let user = null;
+        if (role === 'admin') {
+            user = await Admin.findById(userId);
+        } else if (role === 'counsellor') {
+            user = await Counsellor.findById(userId);
+        } else {
+            user = await User.findById(userId);
+        }
         req.user = user;
 
         next();

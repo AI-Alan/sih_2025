@@ -16,6 +16,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<any>;
+  loginCounsellor: (email: string, password: string) => Promise<any>;
+  loginAdmin: (email: string, password: string) => Promise<any>;
   register: (userData: any) => Promise<any>;
   logout: () => void;
 }
@@ -49,6 +51,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response = await authService.login(email, password);
+      if (response.success) {
+        setUser(response.user);
+      }
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginCounsellor = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const response = await authService.loginCounsellor(email, password);
+      if (response.success) {
+        setUser(response.user);
+      }
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginAdmin = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const response = await authService.loginAdmin(email, password);
       if (response.success) {
         setUser(response.user);
       }
@@ -94,6 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         login,
+        loginCounsellor,
+        loginAdmin,
         register,
         logout,
       }}

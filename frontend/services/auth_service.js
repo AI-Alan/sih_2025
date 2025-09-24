@@ -18,6 +18,32 @@ class AuthService {
     }
   }
 
+  async loginCounsellor(email, password) {
+    try {
+      const response = await axiosInstance.post('/api/auth/login/counsellor', { email, password });
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : { message: 'Network error occurred' };
+    }
+  }
+
+  async loginAdmin(email, password) {
+    try {
+      const response = await axiosInstance.post('/api/auth/login/admin', { email, password });
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : { message: 'Network error occurred' };
+    }
+  }
+
   async register(userData) {
     try {
       const response = await axiosInstance.post('/api/auth/signUp', userData);

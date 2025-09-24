@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Menu, X, Heart, User, LogIn, UserPlus, Home, Info, Activity, BookOpen, MessageCircle, LogOut } from 'lucide-react';
+import { Menu, X, Heart, User, LogIn, UserPlus, Home, Info, Activity, BookOpen, MessageCircle, LogOut, Shield } from 'lucide-react';
 import styles from '../../styles/components/layout/Header.module.css';
 import { useAuth } from '../../context/AuthContext';
 
@@ -53,6 +53,18 @@ const Header: React.FC = () => {
         <div className={styles.authButtons}>
           {isAuthenticated ? (
             <>
+              {user?.role === 'admin' && (
+                <>
+                  <Link href="/admin" className={styles.authButton}>
+                    <Shield size={18} />
+                    Admin
+                  </Link>
+                  <Link href="/admin/counsellors" className={styles.authButton}>
+                    <Shield size={18} />
+                    Counsellors
+                  </Link>
+                </>
+              )}
               <Link href="/dashboard" className={styles.authButton}>
                 <User size={18} />
                 {user?.firstName || 'Profile'}
@@ -112,6 +124,26 @@ const Header: React.FC = () => {
             <div className={styles.mobileAuthButtons}>
               {isAuthenticated ? (
                 <>
+                  {user?.role === 'admin' && (
+                    <>
+                      <Link
+                        href="/admin"
+                        className={styles.mobileAuthButton}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Shield size={18} />
+                        Admin
+                      </Link>
+                      <Link
+                        href="/admin/counsellors"
+                        className={styles.mobileAuthButton}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Shield size={18} />
+                        Counsellors
+                      </Link>
+                    </>
+                  )}
                   <Link
                     href="/dashboard"
                     className={styles.mobileAuthButton}

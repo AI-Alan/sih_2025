@@ -1,27 +1,39 @@
+// backend/routes/adminRoute.js
 import express from 'express';
 const router = express.Router();
-import { registerValidator } from '../middleware/validator.js';
-import { getAllUser, updateUser, deleteUser, getAllCounsellor, createCounsellor } from '../controller/adminController.js';
+
+import {
+    registerValidator,
+    counsellorCreateValidator,
+    counsellorUpdateValidator,
+} from '../middleware/validator.js';
+
+import {
+    getAllUser,
+    updateUser,
+    deleteUser,
+    getAllCounsellor,
+    createCounsellor,
+    updateCounsellor,
+    deleteCounsellor,
+} from '../controller/adminController.js';
+
 import jwtAuth from '../middleware/auth.js';
 import isAdmin from '../middleware/isAdmin.js';
-import cookieParser from 'cookie-parser';
 
-router.use(cookieParser());
+// Require auth and admin role for everything in /api/admin/*
 router.use(jwtAuth);
 router.use(isAdmin);
 
-router.get("/user", getAllUser)
+// Users
+router.get('/user', getAllUser);
+router.put('/user/:id', updateUser);
+router.delete('/user/:id', deleteUser);
 
-router.post("/counsellor", registerValidator, createCounsellor)
-
-router.put("/user/:id", updateUser)
-
-router.delete("/user/:id", deleteUser)
-
-router.get("/counsellor", getAllCounsellor)
-
-// router.put("/counsellor/:id", updateCounsellor)
-
-// router.delete("/counsellor/:id", deleteCounsellor)
+// Counsellors
+router.get('/counsellor', getAllCounsellor);
+router.post('/counsellor', counsellorCreateValidator, createCounsellor);
+router.put('/counsellor/:id', counsellorUpdateValidator, updateCounsellor);
+router.delete('/counsellor/:id', deleteCounsellor);
 
 export default router;

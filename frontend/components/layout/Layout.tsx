@@ -12,13 +12,15 @@ interface LayoutProps {
   title?: string;
   description?: string;
   keywords?: string;
+  header?: React.ReactNode; // allow custom header override
 }
 
 const Layout: React.FC<LayoutProps> = ({
   children,
   title = 'Mann Mitra - Digital Psychological Intervention Platform',
   description = 'A comprehensive digital platform providing psychological interventions and mental health support for college students.',
-  keywords = 'mental health, psychological intervention, college students, therapy, counseling, mindfulness, CBT'
+  keywords = 'mental health, psychological intervention, college students, therapy, counseling, mindfulness, CBT',
+  header,
 }) => {
   return (
     <>
@@ -39,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({
       <div className={styles.layout}>
         {/* <EmergencyBar /> */}
         <NatureBackground />
-        <Header />
+        {header ? header : <Header />}
         <main className={styles.main}>
           {children}
         </main>

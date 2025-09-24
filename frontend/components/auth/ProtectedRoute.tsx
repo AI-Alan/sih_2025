@@ -5,9 +5,10 @@ import { useAuth } from '../../context/AuthContext';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  allowedRoles?: string[]; // e.g., ['admin', 'counsellor']
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false, allowedRoles }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
@@ -21,11 +22,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
       else if (adminOnly && user?.role !== 'admin') {
         router.push('/dashboard');
       }
+      // If allowedRoles is provided, enforce membership
+      else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        router.push('/dashboard');
+      }
     }
-  }, [isAuthenticated, isLoading, router, adminOnly, user]);
+  }, [isAuthenticated, isLoading, router, adminOnly, allowedRoles, user]);
 
   // Show nothing while loading or redirecting
-  if (isLoading || !isAuthenticated || (adminOnly && user?.role !== 'admin')) {
+  if (
+    isLoading ||
+    !isAuthenticated ||
+    (adminOnly && user?.role !== 'admin') ||
+    (allowedRoles && user && !allowedRoles.includes(user.role))
+  ) {
     return null;
   }
 

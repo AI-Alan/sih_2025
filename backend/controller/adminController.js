@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import Counsellor from '../models/counsellor.js';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 
@@ -10,10 +11,10 @@ export const getAllUser = async (req, res) => {
             return res.status(403).json({success: false, msg: "No user found"})
         }
         
-        res.status(200).json({success: true, msg: "All users fetched successfully", users});
+        res.status(200).json({success: true, message: "All users fetched successfully", users});
 
     } catch (error) {
-        res.status(500).json({success: false, msg: "Internal server error", error: error.message});
+        res.status(500).json({success: false, message: "Internal server error", error: error.message});
     }
 }
 
@@ -34,7 +35,7 @@ export const updateUser = async (req, res) => {
         return res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json({ message: "User updated successfully", user: updatedUser });
+        res.status(200).json({ success: true, message: "User updated successfully", user: updatedUser });
 
     } catch (error) {
         res.status(400).json({ success: false, error: error.message })
@@ -52,18 +53,17 @@ export const deleteUser = async (req, res) => {
 
         res.status(200).json({success: true, msg: "User deleted successfully", user: deletedUser})
     } catch (error) {
-        res.status(500).json({success: false, msg: "Internal server error", errror: error.message})
+        res.status(500).json({success: false, message: "Internal server error", errror: error.message})
     }
 }
 
 export const getAllCounsellor = async (req, res) => {
     try {
-        const counsellors = await User.find({});
-        console.log(counsellors);
-        res.status(200).json({success: true, counsellors})
+        const counsellors = await Counsellor.find({});
+        res.status(200).json({success: true, message: "All counsellors fetched successfully", counsellors})
 
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message })
+        res.status(400).json({ success: false, message: "Failed to fetch counsellors", error: error.message })
     }
 }
 
@@ -75,46 +75,63 @@ export const createCounsellor = async (req, res) => {
         if(!errors.isEmpty()){
             return res.status(400).json({
                 success: false,
-                msg: "Field is required",
+                message: "Field is required",
                 errors: errors.array()
             });
         }
-        //save User
-        const { username, email, password, role } = req.body;
-        const existingUser = await User.findOne({ $or: [{username}, {email}]});
+        // Create Counsellor
+        const { firstName, lastName, contactNo, email, password, qualifications, specialization = [], availability } = req.body;
+        const existingCounsellor = await Counsellor.findOne({ email });
 
-        if(existingUser) return res.status(400).json({ message: "Username or email already exist"});
+        if(existingCounsellor) return res.status(400).json({ success: false, message: "Email already exists"});
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            username,
-            email, 
+        const newCounsellor = new Counsellor({
+            firstName,
+            lastName,
+            contactNo,
+            email,
             password: hashedPassword,
-            role
+            qualifications,
+            specialization,
+            availability,
+            role: 'counsellor'
         });
-        const savedUser = await newUser.save();
-        console.log(savedUser);
-        res.status(200).json({ success: true, msg: "User registered successfully", savedUser })
+        const savedCounsellor = await newCounsellor.save();
+        const { password: _pw, ...safe } = savedCounsellor.toObject();
+        res.status(200).json({ success: true, message: "Counsellor created successfully", counsellor: safe })
 
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message })
+        res.status(400).json({ success: false, message: "Failed to create counsellor", error: error.message })
     }
 }
 
-// export const updateCounsellor = (req, res) => {
-//     res.send("update user counsellor");
-// }
+export const updateCounsellor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = { ...req.body };
+        if (updates.password) {
+            updates.password = await bcrypt.hash(updates.password, 10);
+        }
+        const updated = await Counsellor.findByIdAndUpdate(id, { $set: updates }, { new: true });
+        if (!updated) return res.status(404).json({ success: false, message: 'Counsellor not found' });
+        const { password: _pw, ...safe } = updated.toObject();
+        res.status(200).json({ success: true, message: 'Counsellor updated successfully', counsellor: safe });
+    } catch (error) {
+        res.status(400).json({ success: false, message: 'Failed to update counsellor', error: error.message });
+    }
+}
 
-// exports const deleteCounsellor = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const deletedCounsellor = await User.findByIdAndDelete(id);
-
-//         res.status(200).json({success: true, msg: "Counsellor deleted successfully" ,deletedCounsellor})
-//     } catch (error) {
-//         res.status(400).json({ success: false, msg: "Error in deleting counsellor" ,error: error.message })
-//     }
-// }
+export const deleteCounsellor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted = await Counsellor.findByIdAndDelete(id);
+        if (!deleted) return res.status(404).json({ success: false, message: 'Counsellor not found' });
+        res.status(200).json({ success: true, message: 'Counsellor deleted successfully' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: 'Error in deleting counsellor', error: error.message });
+    }
+}
 
 export const adminDashboard = (req, res) => {
     res.send("admin dashboard");
