@@ -2,7 +2,10 @@ import User from '../models/user.js';
 import { validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import Student from '../models/student.js';
+import Counsellor from '../models/counsellor.js';
 
+// --------------- user login --------------------
 export const login = async (req, res) => {
     try {
         //check validation error
@@ -40,43 +43,71 @@ export const login = async (req, res) => {
     }
 }
 
-export const signUp = async (req, res) => {
-    try {
-        //check validation error
-        const errors = validationResult(req);
-
-        if(!errors.isEmpty()){
-            return res.status(400).json({
-                success: false,
-                msg: "Field is required",
-                errors: errors.array()
-            });
-        }
-        //save User
-        const { firstName, lastName, university, program, email, password, role } = req.body;
-        const existingUser = await User.findOne({email});
-
-        if(existingUser) return res.status(400).json({ message: "User already exist please login to continue"});
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            firstName,
-            lastName,
-            university,
-            program,
-            email, 
-            password: hashedPassword,
-            role
-        });
-        const savedUser = await newUser.save();
-        console.log(savedUser);
-        res.status(200).json({ success: true, msg: "User registered successfully", savedUser })
-
-    } catch (error) {
-        res.status(500).json({ success: false, msg: "Internal server errror", error: error.message })
+// ----------------- Register -> user(admin), counsellor, student -----------------
+export const register = async (req, res) => {
+  try {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        msg: "Field is required",
+        errors: errors.array()
+      });
     }
-}
 
+    // Destructure request body
+    const { firstName, lastName, email, password, contactNo, role, ...rest } = req.body;
+   
+    const existingUser = await User.findOne({email});
+
+    if(existingUser) return res.status(400).json({ message: "User already exist please login to continue"});
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      contactNo,
+      password: hashedPassword,
+      role
+    });
+    await user.save();
+
+    // 6. Create role-specific document
+    let profile = null;
+
+    if (role === "student") {
+      profile = new Student({
+        userId: user._id,
+        university: rest.university,
+        program: rest.program,
+        branch: rest.branch,
+        semester: rest.semester
+      });
+      await profile.save();
+    }
+
+    if (role === "counsellor") {
+      profile = new Counsellor({
+        userId: user._id,
+        specialization: rest.specialization,
+        experience: rest.experience,
+        availability: rest.availability
+      });
+      await profile.save();
+    }
+
+    res.status(201).json({success: true, msg: `${role} registered successfully`, user, profile });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, msg: "Internal server error", error: error.message });
+  }
+};
+
+// --------------- user logout --------------------
 export const logout = async (req, res) => {
     try {
         res.clearCookie("token");
