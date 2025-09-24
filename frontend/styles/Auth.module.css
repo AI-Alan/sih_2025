@@ -214,6 +214,17 @@
   color: var(--primary-700);
 }
 
+.errorMessage {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: rgb(185, 28, 28);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  margin-top: var(--spacing-sm);
+  text-align: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .authContainer {
