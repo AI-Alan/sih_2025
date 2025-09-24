@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Menu, X, Heart, User, LogIn, UserPlus, Home, Info, Activity, BookOpen, MessageCircle } from 'lucide-react';
+import { Menu, X, Heart, User, LogIn, UserPlus, Home, Info, Activity, BookOpen, MessageCircle, LogOut } from 'lucide-react';
 import styles from '../../styles/components/layout/Header.module.css';
+import { useAuth } from '../../context/AuthContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navigation = [
     { name: 'My Space', href: '/', icon: Home, description: 'Your personal sanctuary' },
@@ -49,14 +51,29 @@ const Header: React.FC = () => {
         </nav>
 
         <div className={styles.authButtons}>
-          <Link href="/login" className={styles.authButton}>
-            <LogIn size={18} />
-            Join In
-          </Link>
-          <Link href="/register" className={`${styles.authButton} ${styles.primary}`}>
-            <UserPlus size={18} />
-            Start My Journey
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link href="/dashboard" className={styles.authButton}>
+                <User size={18} />
+                {user?.firstName || 'Profile'}
+              </Link>
+              <button onClick={logout} className={`${styles.authButton} ${styles.primary}`}>
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={styles.authButton}>
+                <LogIn size={18} />
+                Join In
+              </Link>
+              <Link href="/register" className={`${styles.authButton} ${styles.primary}`}>
+                <UserPlus size={18} />
+                Start My Journey
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -93,22 +110,47 @@ const Header: React.FC = () => {
               })}
             </ul>
             <div className={styles.mobileAuthButtons}>
-              <Link
-                href="/login"
-                className={styles.mobileAuthButton}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <LogIn size={18} />
-                Join In
-              </Link>
-              <Link
-                href="/register"
-                className={`${styles.mobileAuthButton} ${styles.primary}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <UserPlus size={18} />
-                Start My Journey
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className={styles.mobileAuthButton}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User size={18} />
+                    {user?.firstName || 'Profile'}
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }} 
+                    className={`${styles.mobileAuthButton} ${styles.primary}`}
+                  >
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={styles.mobileAuthButton}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn size={18} />
+                    Join In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className={`${styles.mobileAuthButton} ${styles.primary}`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <UserPlus size={18} />
+                    Start My Journey
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

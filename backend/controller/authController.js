@@ -9,8 +9,8 @@ export const login = async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
         return res.status(422).json({
-            status: false,
-            message: "form validation error",
+            success: false,
+            message: "Form validation error",
             errors: errors.array()
         });
         } 
@@ -19,10 +19,10 @@ export const login = async (req, res) => {
         const user = await User.findOne({ email });
 
         if(!user){
-            return res.json("No account found with this email, Please register to continue");    
-        }else{
+            return res.status(404).json({ success: false, message: "No account found with this email. Please register to continue." });    
+        } else {
             const isMatch = await bcrypt.compare(password, user.password);
-            if(!isMatch) return res.status(400).json({message: "Invalid Credentials"});
+            if(!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
             const token = jwt.sign(
                 {userId: user._id, email},
                 process.env.JWT_SECRET_KEY,
@@ -33,10 +33,11 @@ export const login = async (req, res) => {
                 secure: false, //true in production
                 maxAge: 259200000
             })
-            return res.status(200).json({ success: true, msg: "User login successfully", user, token})
+            const { password: _pw, ...safeUser } = user.toObject();
+            return res.status(200).json({ success: true, message: "User login successfully", user: safeUser, token })
         }
     } catch (error) {
-        res.status(500).json({ success: false, msg: "Internal server error", error: error.message })
+        res.status(500).json({ success: false, message: "Internal server error", error: error.message })
     }
 }
 
@@ -48,32 +49,36 @@ export const signUp = async (req, res) => {
         if(!errors.isEmpty()){
             return res.status(400).json({
                 success: false,
-                msg: "Field is required",
+                message: "Field is required",
                 errors: errors.array()
             });
         }
         //save User
-        const { firstName, lastName, university, program, email, password, role } = req.body;
+        const { firstName, lastName, contactNo, university, program, branch, semester, email, password, role } = req.body;
         const existingUser = await User.findOne({email});
 
-        if(existingUser) return res.status(400).json({ message: "User already exist please login to continue"});
+        if(existingUser) return res.status(400).json({ success: false, message: "User already exists. Please login to continue."});
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             firstName,
             lastName,
+            contactNo,
             university,
             program,
+            branch,
+            semester,
             email, 
             password: hashedPassword,
-            role
+            role: role || "student"
         });
         const savedUser = await newUser.save();
         console.log(savedUser);
-        res.status(200).json({ success: true, msg: "User registered successfully", savedUser })
+        const { password: _pw2, ...safeSavedUser } = savedUser.toObject();
+        res.status(200).json({ success: true, message: "User registered successfully", user: safeSavedUser })
 
     } catch (error) {
-        res.status(500).json({ success: false, msg: "Internal server errror", error: error.message })
+        res.status(500).json({ success: false, message: "Internal server error", error: error.message })
     }
 }
 
@@ -82,7 +87,7 @@ export const logout = async (req, res) => {
         res.clearCookie("token");
         res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, msg: "Internal server errror", error: error.message })
+        res.status(500).json({ success: false, message: "Internal server error", error: error.message })
     }
 }
 

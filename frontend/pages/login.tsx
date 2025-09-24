@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import Layout from '../components/layout/Layout';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import styles from '../styles/pages/Auth.module.css';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +12,23 @@ const LoginPage: React.FC = () => {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+  const { login, isLoading, isAuthenticated } = useAuth();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
+  
+  // Check for registration success message
+  useEffect(() => {
+    if (router.query.registered === 'true') {
+      setError('Registration successful! Please log in.');
+    }
+  }, [router.query]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -21,13 +39,19 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError('');
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Handle login logic here
-    }, 2000);
+    try {
+      const { email, password } = formData;
+      const response = await login(email, password);
+      
+      if (!response.success) {
+        setError(response.message || 'Login failed. Please try again.');
+      }
+      // No need to redirect here as the useEffect will handle it when isAuthenticated changes
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during login. Please try again.');
+    }
   };
 
   return (
@@ -96,6 +120,12 @@ const LoginPage: React.FC = () => {
               </Link>
             </div>
 
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+            
             <button
               type="submit"
               disabled={isLoading}
