@@ -13,17 +13,7 @@ const userSchema = new mongoose.Schema({
     contactNo: {
         type: Number,
         required: true,
-    },
-    university: {
-        type: String,
-        required: true,
-    },
-    program: {
-        type: String,
-        required: true
-    },
-    branch: String,
-    semester: String,   
+    },  
     email: {
         type: String,
         required: true,
@@ -35,6 +25,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
+        enum: ["admin", "student", "counsellor"],
         default: "student"
     }
 },{

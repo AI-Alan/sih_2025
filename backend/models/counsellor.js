@@ -1,46 +1,27 @@
 import mongoose from 'mongoose';
 
 const counsellorSchema = new mongoose.Schema({
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
-        type: String,
-        required: true
-    },
-    contactNo: {
-        type: Number,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    qualifications: {
-        type: String,
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true
     },
     specialization: {
-        type: [String], // e.g., ["Stress", "Career Guidance"]
-        default: []
-    },
-    availability: {
-        type: String, // e.g., "Mon-Fri, 10am-6pm"
+        type: String,
         required: true
     },
-    role: {
-        type: String,
-        default: "counsellor"
+    experience: {
+        type: Number,
+        required: true
+    },
+    availability: {
+        type: [String],
+        required: true
     }
-}, {
+},{
     timestamps: true
-});
+}
+)
 
 const Counsellor = mongoose.model("Counsellor", counsellorSchema);
 export default Counsellor;
