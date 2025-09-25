@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Bell, Settings, User } from 'lucide-react';
 import styles from '../../styles/components/dashboard/DashboardHeader.module.css';
+import { useAuth } from '../../context/AuthContext';
 
 const DashboardHeader: React.FC = () => {
   const [currentDate, setCurrentDate] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     setCurrentDate(new Date().toLocaleDateString('en-US', {
@@ -18,7 +20,9 @@ const DashboardHeader: React.FC = () => {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.welcomeSection}>
-          <h1 className={styles.title}>Welcome back, Sarah!</h1>
+          <h1 className={styles.title}>
+            Welcome back, {user?.firstName || 'User'}!
+          </h1>
           <p className={styles.subtitle}>
             <Calendar size={16} />
             {currentDate}
@@ -35,7 +39,7 @@ const DashboardHeader: React.FC = () => {
           </button>
           <button className={styles.profileButton}>
             <User size={20} />
-            <span>Profile</span>
+            <span>{user?.firstName || 'Profile'}</span>
           </button>
         </div>
       </div>

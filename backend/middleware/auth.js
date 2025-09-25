@@ -25,11 +25,14 @@ const jwtAuth = async (req, res, next) => {
         } else {
             user = await User.findById(userId);
         }
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
         req.user = user;
 
         next();
     } catch (error) {
-        res.status(401).json({ success: false, msg: "Invalid or expired token"})
+        res.status(401).json({ success: false, message: 'Invalid or expired token' })
     }
 }
 

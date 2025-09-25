@@ -1,0 +1,9 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.0
+pydantic==2.8.2
+python-dotenv==1.0.1
+# Optional future integrations
+crewai>=0.51.0
+openai>=1.40.0
+sentence-transformers>=2.2.2
+langchain-google-genai>=2.1.0

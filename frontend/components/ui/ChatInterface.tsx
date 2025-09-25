@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, User } from 'lucide-react';
 import styles from '../../styles/components/ui/ChatInterface.module.css';
+import { sendAIChat, getChatbotHealth } from '../../services/chat_service';
+import { useAuth } from '../../context/AuthContext';
 
 interface Message {
   id: string;
@@ -15,36 +17,55 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hi there! I'm Mann Mitra, your supportive companion. How are you feeling today? 💚",
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [domain, setDomain] = useState<'stress' | 'burnout' | 'career' | 'relationships'>('stress');
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Initialize welcome message when user context is available
+  useEffect(() => {
+    if (user && messages.length === 0) {
+      setMessages([{
+        id: '1',
+        text: `Hi ${user.firstName}! I'm Mann Mitra, your supportive companion. How are you feeling today? 💚`,
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    } else if (!user && messages.length === 0) {
+      setMessages([{
+        id: '1',
+        text: "Hi there! I'm Mann Mitra, your supportive companion. How are you feeling today? 💚",
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    }
+  }, [user, messages.length]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const botResponses = [
-    "I understand how you're feeling. Remember, it's okay to have difficult days. 🌸",
-    "You're not alone in this. Many students go through similar experiences. 💙",
-    "Taking care of your mental health is a sign of strength, not weakness. 🌱",
-    "Would you like to try a breathing exercise or mindfulness technique? 🧘‍♀️",
-    "It's important to be gentle with yourself. Progress takes time. 🌿",
-    "Have you tried talking to someone you trust about how you're feeling? 🤗",
-    "Remember, seeking help is a brave and important step. 🌺",
-    "Let's focus on one small positive thing you can do for yourself today. ✨"
-  ];
+  // Poll chatbot health
+  useEffect(() => {
+    let mounted = true;
+    const check = async () => {
+      const ok = await getChatbotHealth();
+      if (mounted) setIsOnline(ok);
+    };
+    check();
+    const id = setInterval(check, 10000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, []);
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -59,20 +80,35 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsTyping(true);
-
-    // Simulate bot response delay
-    setTimeout(() => {
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+    try {
+      const data = await sendAIChat({ message: userMessage.text, domain, update_profile: undefined });
+      const botText = data?.reply || "I'm here for you.";
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: randomResponse,
+        text: botText,
         sender: 'bot',
         timestamp: new Date()
       };
-      
-      setMessages(prev => [...prev, botMessage]);
+      const suggestions: string[] | undefined = data?.suggestions;
+
+      setMessages(prev => {
+        const next = [...prev, botMessage];
+        if (suggestions && suggestions.length) {
+          const sugText = `Suggestions:\n- ${suggestions.join('\n- ')}`;
+          next.push({ id: (Date.now() + 2).toString(), text: sugText, sender: 'bot', timestamp: new Date() });
+        }
+        return next;
+      });
+    } catch (e) {
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 3).toString(),
+        text: 'Sorry, I could not connect right now. Please try again.',
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -92,12 +128,39 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
             <Bot className={styles.botIcon} />
             <div>
               <h3>Mann Mitra</h3>
-              <span className={styles.status}>Online</span>
+              <span className={styles.status} style={{ color: isOnline ? '#10B981' : '#EF4444' }}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
             </div>
           </div>
           <button className={styles.closeButton} onClick={onClose}>
             <X size={20} />
           </button>
+        </div>
+
+        {/* Domain Selector */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '0 16px 8px 16px' }}>
+          <label htmlFor="domain-select" style={{ fontSize: 12, color: '#6b7280' }}>Topic:</label>
+          <select
+            id="domain-select"
+            value={domain}
+            onChange={(e) => setDomain(e.target.value as 'stress' | 'burnout' | 'career' | 'relationships')}
+            style={{
+              flex: '0 0 auto',
+              padding: '6px 8px',
+              borderRadius: 8,
+              border: '1px solid #E5E7EB',
+              background: 'white',
+              fontSize: 12,
+              color: '#374151'
+            }}
+            aria-label="Select conversation topic"
+          >
+            <option value="stress">Stress</option>
+            <option value="burnout">Burnout</option>
+            <option value="career">Career</option>
+            <option value="relationships">Relationships</option>
+          </select>
         </div>
 
         <div className={styles.messagesContainer}>

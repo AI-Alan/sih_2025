@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Play, Shield, Users, Brain } from 'lucide-react';
 import RotatingAffirmation from './RotatingAffirmation';
+import StickyNotesManager from '../ui/StickyNotesManager';
 import styles from '../../styles/components/home/Hero.module.css';
 
 const Hero: React.FC = () => {
@@ -127,6 +128,9 @@ const Hero: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Sticky Notes Manager - positioned behind floating bubbles */}
+      <StickyNotesManager />
     </section>
   );
 };
